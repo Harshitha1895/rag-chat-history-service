@@ -34,7 +34,7 @@ docker-compose up --build
 All APIS require the following header:
  
 ```http
-x-api-key: my-secret-api-key
+x-api-key: your_secret_key
 ```
 
 ---
