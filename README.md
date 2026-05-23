@@ -71,6 +71,6 @@ Delete a chat session and its messages.
 Swagger UI is available at:
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html
 ```
  
