@@ -1,0 +1,62 @@
+package com.casestudy.rag_chat_history_service.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+@Slf4j
+@RequiredArgsConstructor
+public class ApiKeyFilter extends OncePerRequestFilter {
+
+    @Value("${security.api-key}")
+    private String apiKey;
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException
+    {
+       String requestApiKey= request.getHeader("x-api-key");
+
+       log.info("Incoming request: {} {}", request.getMethod(),request.getRequestURI());
+
+       if(requestApiKey == null || !requestApiKey.equals(apiKey))
+       {
+           log.error("Invalid API Key");
+
+           response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+           response.setContentType("application/json");
+
+           response.getWriter().write( """
+                   {
+                        "message": "Invalid API Key"
+                   }
+                   """);
+           return;
+       }
+
+       filterChain.doFilter(request,response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
+    {
+        String path = request.getServletPath();
+
+        return path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/actuator");
+    }
+}
